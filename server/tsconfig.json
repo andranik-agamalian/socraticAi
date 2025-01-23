@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "sourceMap": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "ESNext",
+        "moduleResolution": "node",  
+        "target": "ES2017",
+        "allowJs": true,
+        "jsx": "react",
+        "skipLibCheck": true,
+        "types": ["node"]  
+      },
+      "ts-node": {
+        "esm": true,
+        "transpileOnly": true,
+        "compilerOptions": {
+          "moduleResolution": "node"
+        }
+      },
+    "include": ["src/**/*"],
+  }
+  

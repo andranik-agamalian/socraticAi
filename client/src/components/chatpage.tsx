@@ -73,13 +73,13 @@ const dummyMessages = [
     timestamp: "10:00 AM",
     avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
   },
-//   {
-//     id: 2,
-//     text: "I'm doing great! Thanks for asking. How about you?",
-//     isUser: true,
-//     timestamp: "10:02 AM",
-//     avatar: "images.unsplash.com/photo-1599566150163-29194dcaad36",
-//   },
+  // {
+  //   id: 2,
+  //   text: "I'm doing great! Thanks for asking. How about you?",
+  //   isUser: true,
+  //   timestamp: "10:02 AM",
+  //   avatar: "images.unsplash.com/photo-1599566150163-29194dcaad36",
+  // },
 //   {
 //     id: 3,
 //     text: "I'm good too! Just working on some new projects.",
