@@ -65,10 +65,16 @@ const InputContainer = styled(Box)({
   borderTop: "1px solid rgba(0, 0, 0, 0.1)",
 });
 
+const generateTime = () => {
+  return new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 const dummyMessages = [
   {
     id: 1,
-    text: "Hey! How are you doing?",
+    text: "Hey! What do you want to learn?",
     isUser: false,
     timestamp: "10:00 AM",
     avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
@@ -89,9 +95,19 @@ const dummyMessages = [
 //   },
 ];
 
+interface Message {
+  id: number;
+  text: string;
+  isUser: boolean;
+  timestamp: string;
+  avatar: string;
+}
+
 const ChatUI = () => {
-  const [messages, setMessages] = useState(dummyMessages);
+  // Add type for a "message"
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [aiResponses, setAiResponses] = useState([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
 
   const scrollToBottom = () => {
@@ -104,23 +120,59 @@ const ChatUI = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const currentTime = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+  useEffect(() => {
+    if (aiResponses.length) {
       setMessages([
         ...messages,
+        ...aiResponses
+      ]);
+
+      setAiResponses([])
+    }
+  }, [aiResponses]);
+
+  const handleSendMessage = async () => {
+    if (newMessage.trim()) {
+      setMessages([
+        ...messages,
+        // populate state with message from user
         {
           id: messages.length + 1,
           text: newMessage,
           isUser: true,
-          timestamp: currentTime,
+          timestamp: generateTime(),
           avatar: "images.unsplash.com/photo-1599566150163-29194dcaad36",
         },
+        // ...serverMessages, // populate state with response from server
       ]);
       setNewMessage("");
+      // TODO: Make pretty
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+
+      const response = await fetch("http://localhost:3000/api/v1/chat", {
+        method: "POST",
+        body: JSON.stringify({ message: newMessage }), // TODO: Include chat history
+        headers,
+      });
+
+      // TODO: Handle error if response.status !== 200
+      const data = await response.json();
+      console.log(data);
+
+      // Update state with message(s) returned from the server
+      const serverMessages = data.messages.map((message: string) => {
+        return {
+          id: Math.random() * 10000, // TODO: Use uuid or another unique identifier
+          text: message,
+          isUser: false,
+          timestamp: generateTime(),
+          avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330"
+        }
+      });
+
+      // come up with better name
+      setAiResponses(serverMessages);
     }
   };
 
