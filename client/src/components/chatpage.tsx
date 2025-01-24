@@ -84,7 +84,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
-  const { send, conversationHistory } = useOpenAI();
+  const { send, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -97,20 +97,21 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   }, [messages]);
 
   useEffect(() => {
-    if (conversationHistory.length > 0) {
+    if (responseMessage) {
       setMessages([
         ...messages,
         {
           id: uuidv4(),
-          text: conversationHistory.at(-1).content,
+          text: responseMessage,
           isUser: false,
           timestamp: createCurrentTimestamp(),
           avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
         },
       ]);
+      resetResponsMessage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationHistory]);
+  }, [responseMessage]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {

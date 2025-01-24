@@ -8,9 +8,6 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export const openAiController = async (req: Request, res: Response, next: NextFunction) => {
   const { message, sessionId } = req.body;
 
-  console.log("Message received:", message);
-  console.log("Session ID:", sessionId);
-
   // Fetch chatHistory from Redis
   let chatHistory = [];
   const cachedChatHistory = await redisClient.get(sessionId);
@@ -45,8 +42,7 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
     // Save updated chatHistory back to Redis with a TTL (e.g., 1 hour)
     await redisClient.set(sessionId, JSON.stringify(chatHistory), { EX: 3600 });
 
-    // Set the updated chatHistory to res.locals for further middleware or response handling
-    res.locals.conversationHistory = chatHistory;
+    res.locals.responseMessage = assistantMessage;
 
     return next();
   } catch (error) {
