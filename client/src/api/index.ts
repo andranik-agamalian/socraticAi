@@ -1,4 +1,3 @@
-
 import { Conversation } from "../types";
 
 const BASE_URL = "http://localhost:3000/api/v1";
@@ -12,4 +11,4 @@ export const chat = (message: string, conversationHistory: Conversation[]) => {
     body: JSON.stringify({ message, conversationHistory }),
     headers,
   });
-}
+};

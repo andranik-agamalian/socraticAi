@@ -3,4 +3,4 @@ export const createCurrentTimestamp = () => {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
+};

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Markdown from 'react-markdown';
 import { createCurrentTimestamp } from "../utils";
 import { useOpenAI } from "../hooks/useOpenAI";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 import {
   Box,
@@ -103,7 +103,7 @@ const ChatUI = () => {
           text: conversationHistory.at(-1).content,
           isUser: false,
           timestamp: createCurrentTimestamp(),
-          avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330"
+          avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
         },
       ]);
     }
@@ -130,7 +130,7 @@ const ChatUI = () => {
     }
   };
 
-  const handleKeyPress = (e:any) => {
+  const handleKeyPress = (e: any) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();

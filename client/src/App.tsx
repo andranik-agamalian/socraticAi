@@ -1,13 +1,11 @@
-import ChatPage from 'components/ChatPage'
+import ChatPage from "components/ChatPage";
 
 function App() {
-  
-
   return (
     <>
-      <ChatPage/>
+      <ChatPage />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
