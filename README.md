@@ -9,3 +9,4 @@ In order to run server on port 3000:
 
 1. cd server
 2. npm run start
+3. Add a .env with an OPENAI_API_KEY
