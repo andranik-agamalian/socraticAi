@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import Markdown from 'react-markdown';
 
 import {
   Box,
@@ -180,7 +181,7 @@ const ChatUI = () => {
               />
               <MessageContent isUser={message.isUser}>
                 <Typography variant="body1" component="div">
-                  {message.text}
+                  <Markdown>{message.text}</Markdown>
                 </Typography>
                 <Typography
                   variant="caption"
