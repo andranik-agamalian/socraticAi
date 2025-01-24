@@ -5,29 +5,24 @@ import systemPrompt from "../prompts/v1/systemPrompt.ts";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export const openAiController = async (req: Request, res: Response, next: NextFunction) => {
-  const { message } = req.body
-  console.log('userQuery -->', message)
+  const { message, conversationHistory } = req.body
 
- 
-  try{
+  if (conversationHistory.length) {
+    conversationHistory.push({ role: 'user', content: message})
+  } else {
+    conversationHistory.push({ "role": "user", "content": message })
+    conversationHistory.push({ "role": "system", "content": systemPrompt })
+  }
+
+  try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Change to gpt-4o-mini?
       store: true,
-      messages: [
-          { "role": "user", "content": message },
-          { "role": "system", "content": systemPrompt }
-      ]
+      messages: conversationHistory
     });
 
-    console.log('completion --->', completion)
-    // competion.choices[0].message.content
-    const messages = completion.choices.map((choice) => {
-      console.log('choice.message.content ---> ',choice.message)
-      return choice.message.content;
-    })
-
-     
-    res.locals.messages = messages;
+    const message = completion.choices[0].message.content;
+    res.locals.conversationHistory = [...conversationHistory, { role: 'assistant', content: message }];
 
     return next();
   } catch (error) {
