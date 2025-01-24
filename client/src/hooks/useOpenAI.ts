@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { chat } from "../api";
 
-export const useOpenAI = () => {
-  const [conversationHistory, setConversationHistory] = useState([]);
+export const useOpenAI = (sessionId) => {
+  const [responseMessage, setResponseMessage] = useState("");
 
   const send = async (message: string) => {
-    const response = await chat(message, conversationHistory);
+    const response = await chat(message, sessionId);
 
     // TODO: Handle error if response.status !== 200
     const data = await response.json();
 
-    setConversationHistory(data.conversationHistory);
+    setResponseMessage(data.responseMessage);
   };
 
-  return { conversationHistory, send };
+  const resetResponsMessage = () => {
+    setResponseMessage("");
+  };
+
+  return { responseMessage, send, resetResponsMessage };
 };

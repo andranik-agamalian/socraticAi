@@ -14,7 +14,6 @@ import {
   Stack,
   Container,
 } from "@mui/material";
-
 import { styled } from "@mui/system";
 import { IoSend } from "react-icons/io5";
 
@@ -77,12 +76,15 @@ interface Message {
   avatar: string;
 }
 
-const ChatUI = () => {
-  // Add type for a "message"
+interface ChatUIProps {
+  sessionId: string;
+}
+
+const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
-  const { send, conversationHistory } = useOpenAI();
+  const { send, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -95,20 +97,21 @@ const ChatUI = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (conversationHistory.length > 0) {
+    if (responseMessage) {
       setMessages([
         ...messages,
         {
           id: uuidv4(),
-          text: conversationHistory.at(-1).content,
+          text: responseMessage,
           isUser: false,
           timestamp: createCurrentTimestamp(),
           avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
         },
       ]);
+      resetResponsMessage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationHistory]);
+  }, [responseMessage]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
@@ -129,8 +132,9 @@ const ChatUI = () => {
       send(newMessage);
     }
   };
+  
 
-  const handleKeyPress = (e: any) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -145,11 +149,8 @@ const ChatUI = () => {
             <MessageBubble key={message.id} isUser={message.isUser}>
               <Avatar
                 src={`https://${message.avatar}`}
-                alt={message.isUser ? "User" : "Contact"}
-                sx={{
-                  width: 40,
-                  height: 40,
-                }}
+                alt={message.isUser ? "User" : "Assistant"}
+                sx={{ width: 40, height: 40 }}
               />
               <MessageContent isUser={message.isUser}>
                 <Typography variant="body1" component="div">
@@ -188,9 +189,7 @@ const ChatUI = () => {
               sx={{
                 backgroundColor: "#2196f3",
                 color: "#fff",
-                "&:hover": {
-                  backgroundColor: "#1976d2",
-                },
+                "&:hover": { backgroundColor: "#1976d2" },
               }}
             >
               <IoSend />
@@ -203,3 +202,4 @@ const ChatUI = () => {
 };
 
 export default ChatUI;
+

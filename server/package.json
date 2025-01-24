@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm src/index.ts"
-
+    "start": "npm run start-redis && nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm src/index.ts",
+    "start-redis": "bash ./scripts/start_redis.sh",
+    "stop-redis": "bash ./scripts/stop_redis.sh"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "openai": "^4.80.0",
+    "redis": "^4.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.21.0"

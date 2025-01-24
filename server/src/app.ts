@@ -18,11 +18,10 @@ app.get("/", (_req, res) => {
 
 app.post("/api/v1/chat", openAiController, (req, res) => {
     // @ts-ignore
-    const { message, conversationHistory } = res.locals;
+    const { responseMessage } = res.locals;
 
     res.status(200).json({
-        message,
-        conversationHistory
+        responseMessage
     });
 })
 
