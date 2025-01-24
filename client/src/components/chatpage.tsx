@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import Markdown from 'react-markdown';
+import { createCurrentTimestamp } from "../utils";
+import { useOpenAI } from "../hooks/useOpenAI";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   Box,
@@ -66,15 +69,8 @@ const InputContainer = styled(Box)({
   borderTop: "1px solid rgba(0, 0, 0, 0.1)",
 });
 
-const generateTime = () => {
-  return new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 interface Message {
-  id: number;
+  id: string;
   text: string;
   isUser: boolean;
   timestamp: string;
@@ -85,9 +81,8 @@ const ChatUI = () => {
   // Add type for a "message"
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [response, setResponse] = useState(null);
-  const [conversationHistory, setConversationHistory] = useState([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
+  const { send, conversationHistory } = useOpenAI();
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -100,15 +95,20 @@ const ChatUI = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (response) {
+    if (conversationHistory.length > 0) {
       setMessages([
         ...messages,
-        response,
+        {
+          id: uuidv4(),
+          text: conversationHistory.at(-1).content,
+          isUser: false,
+          timestamp: createCurrentTimestamp(),
+          avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
+        },
       ]);
-
-      setResponse(null)
     }
-  }, [response]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationHistory]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
@@ -116,49 +116,21 @@ const ChatUI = () => {
         ...messages,
         // populate state with message from user
         {
-          id: messages.length + 1,
+          id: uuidv4(),
           text: newMessage,
           isUser: true,
-          timestamp: generateTime(),
+          timestamp: createCurrentTimestamp(),
           avatar: "images.unsplash.com/photo-1599566150163-29194dcaad36",
         },
         // ...serverMessages, // populate state with response from server
       ]);
       setNewMessage("");
 
-      send();
+      send(newMessage);
     }
   };
 
-  const send = async () => {
-    // TODO: Make pretty
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-
-    const response = await fetch("http://localhost:3000/api/v1/chat", {
-      method: "POST",
-      body: JSON.stringify({ message: newMessage, conversationHistory }),
-      headers,
-    });
-
-    // TODO: Handle error if response.status !== 200
-    const data = await response.json();
-
-    // Update state with message(s) returned from the server
-    const serverMessage = {
-      id: Math.random() * 10000, // TODO: Use uuid or another unique identifier
-      text: data.conversationHistory.at(-1).content,
-      isUser: false,
-      timestamp: generateTime(),
-      avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330"
-    }
-    console.log("serverMessage: ", serverMessage)
-    // come up with better name
-    setResponse(serverMessage);
-    setConversationHistory(data.conversationHistory);
-  }
-
-  const handleKeyPress = (e:any) => {
+  const handleKeyPress = (e: any) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();

@@ -1,13 +1,11 @@
-import ChatUI from './components/chatpage'
+import ChatPage from "components/ChatPage";
 
 function App() {
-  
-
   return (
     <>
-      <ChatUI/>
+      <ChatPage />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
