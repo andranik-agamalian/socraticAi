@@ -1,4 +1,4 @@
-import ChatUI from './components/chatpage'
+import ChatPage from "components/ChatPage";
 import { v4 as uuidv4 } from 'uuid';
 
 const getSessionId = (): string => {
@@ -17,13 +17,11 @@ const getSessionId = (): string => {
 const sessionId = getSessionId();
 
 function App() {
-  
-
   return (
     <>
-      <ChatUI sessionId={sessionId} />
+      <ChatPage sessionId={sessionId} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

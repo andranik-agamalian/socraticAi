@@ -19,8 +19,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "incremental": true
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "components/*": ["src/components/*"]
+    }
   },
-  
+
   "include": ["src"]
 }

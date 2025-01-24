@@ -1,4 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import Markdown from 'react-markdown';
+import { createCurrentTimestamp } from "../utils";
+import { useOpenAI } from "../hooks/useOpenAI";
+import { v4 as uuidv4 } from "uuid";
+
 import {
   Box,
   TextField,
@@ -63,15 +68,8 @@ const InputContainer = styled(Box)({
   borderTop: "1px solid rgba(0, 0, 0, 0.1)",
 });
 
-const generateTime = () => {
-  return new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
 interface Message {
-  id: number;
+  id: string;
   text: string;
   isUser: boolean;
   timestamp: string;
@@ -85,9 +83,8 @@ interface ChatUIProps {
 const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [response, setResponse] = useState(null);
-  const [conversationHistory, setConversationHistory] = useState([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
+  const { send, conversationHistory } = useOpenAI();
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -100,63 +97,38 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   }, [messages]);
 
   useEffect(() => {
-    if (response) {
+    if (conversationHistory.length > 0) {
       setMessages([
         ...messages,
-        response,
+        {
+          id: uuidv4(),
+          text: conversationHistory.at(-1).content,
+          isUser: false,
+          timestamp: createCurrentTimestamp(),
+          avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
+        },
       ]);
-
-      setResponse(null)
     }
-  }, [response]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationHistory]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      // Add user message to messages state
-      const userMessage = {
-        id: Date.now(),
-        text: newMessage,
-        isUser: true,
-        timestamp: generateTime(),
-        avatar: "images.unsplash.com/photo-1599566150163-29194dcaad36",
-      };
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages([
+        ...messages,
+        // populate state with message from user
+        {
+          id: uuidv4(),
+          text: newMessage,
+          isUser: true,
+          timestamp: createCurrentTimestamp(),
+          avatar: "images.unsplash.com/photo-1599566150163-29194dcaad36",
+        },
+        // ...serverMessages, // populate state with response from server
+      ]);
       setNewMessage("");
-  
-      try {
-        // Send user message to the server
-        const response = await fetch("http://localhost:3000/api/v1/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, message: newMessage }),
-        });
-  
-        if (!response.ok) {
-          throw new Error("Failed to send message");
-        }
-  
-        const data = await response.json();
-  
-        // Ensure correct handling of the server response
-        const assistantMessageText = data.response || data.conversationHistory.at(-1).content;
-  
-        // Add assistant message to messages state
-        const assistantMessage = {
-          id: Date.now() + 1,
-          text: assistantMessageText,
-          isUser: false,
-          timestamp: generateTime(),
-          avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-  
-        // Update conversation history if server provides it
-        if (data.conversationHistory) {
-          setConversationHistory(data.conversationHistory);
-        }
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
+
+      send(newMessage);
     }
   };
   
@@ -180,8 +152,13 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
                 sx={{ width: 40, height: 40 }}
               />
               <MessageContent isUser={message.isUser}>
-                <Typography variant="body1">{message.text}</Typography>
-                <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                <Typography variant="body1" component="div">
+                  <Markdown>{message.text}</Markdown>
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ opacity: 0.7, mt: 0.5, display: "block" }}
+                >
                   {message.timestamp}
                 </Typography>
               </MessageContent>
