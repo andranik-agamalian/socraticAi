@@ -1,8 +1,8 @@
-## About the App
+# About the App
 
 This is a Socratic Learning ChatBot designed to facilitate thoughtful and engaging conversations to aid in learning and exploration.
 
-## Requirements
+# Requirements
 
 Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed to run the Redis server.
 
