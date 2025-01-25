@@ -17,7 +17,7 @@ import {
 import { styled } from "@mui/system";
 import { IoSend } from "react-icons/io5";
 
-const ChatContainer = styled(Paper)(({ theme }) => ({
+const ChatContainer = styled(Paper)(() => ({
   height: "80vh",
   display: "flex",
   flexDirection: "column",
