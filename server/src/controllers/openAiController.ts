@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { Request, Response, NextFunction } from "express";
 import redisClient from "../utils/redisClient.js";
-import systemPrompt from "../prompts/v1/systemPrompt.ts";
+import { systemPrompt, META_SCHEMA } from "../prompts/v4/systemPrompt.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -29,6 +29,7 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
     // Send the chatHistory to OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Change to gpt-4o-mini?
+      response_format:{"type": "json_schema", "json_schema": META_SCHEMA},
       store: true,
       messages: chatHistory,
     });
