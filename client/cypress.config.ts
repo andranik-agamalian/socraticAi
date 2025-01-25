@@ -12,6 +12,7 @@ module.exports = defineConfig({
       // implement node event listeners here
     },
   },
+  defaultCommandTimeout: 10000,
   component: {
     devServer: {
       framework: 'react',

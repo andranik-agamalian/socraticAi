@@ -146,7 +146,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
       <ChatContainer>
         <MessagesContainer>
           {messages.map((message) => (
-            <MessageBubble key={message.id} isUser={message.isUser}>
+            <MessageBubble data-cy={`chatgpt-${message.isUser}`} key={message.id} isUser={message.isUser}>
               <Avatar
                 src={`https://${message.avatar}`}
                 alt={message.isUser ? "User" : "Assistant"}
@@ -170,6 +170,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
         <InputContainer>
           <Stack direction="row" spacing={2}>
             <TextField
+              data-cy="input-text"
               fullWidth
               multiline
               maxRows={4}
