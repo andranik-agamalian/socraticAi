@@ -8,7 +8,13 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "prettier": "prettier --write .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cy:open-e2e": "cypress open --e2e --browser chrome",
+    "cy:open-unit": "cypress open --component --browser chrome",
+    "cy:run-e2e": "cypress run --e2e",
+    "cy:run-unit": "cypress run --component",
+    "cy:e2e": "start-server-and-test start http-get://localhost:5173 cy:open-e2e"
+    
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -25,6 +31,7 @@
     "@types/react-dom": "^18.3.5",
     "@types/react-icons": "^3.0.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "cypress": "^14.0.0",
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
