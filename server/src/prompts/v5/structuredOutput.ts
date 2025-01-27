@@ -13,7 +13,8 @@ const structuredOutput = {
           "enum": [
             "beginner",
             "intermediate",
-            "advanced"
+            "advanced",
+            "expert"
           ]
         },
         "student_details": {
@@ -38,15 +39,10 @@ const structuredOutput = {
               "type": "string",
               "description": "The students learning style",
               "enum":[
-                "Accommodating",
-                "Converging",
                 "Diverging",
                 "Assimilating",
-                "Inclusive",
-                "Balanced",
-                "Active",
-                "Reflective",
-                "Theorist",
+                "Accommodating",
+                "Converging"
               ]
             },
           },
@@ -127,7 +123,7 @@ const structuredOutput = {
         "ai_role",
         "session_report",
         "correct_count",
-        "incorrect_count"
+        "incorrect_count",
       ],
       "additionalProperties": false
     },

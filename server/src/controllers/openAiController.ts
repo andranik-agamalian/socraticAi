@@ -39,7 +39,7 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
       }
     });
 
-    // console.log('completion w/ structured output --->', completion)
+    console.log('completion w/ structured output --->', completion)
 
     let assistantMessage;
     let userProfile;
@@ -51,8 +51,10 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
       // console.log('completion result', result)
     }
 
-    console.log('assistantMessage --->', assistantMessage)
+    // console.log('assistantMessage --->', assistantMessage)
     console.log('userProfile output --->', userProfile)
+    console.log('users correct score --->', userProfile.correct_count)
+    console.log('users incorrect score --->', userProfile.incorrect_count)
 
     // Get the assistant's response
     // const assistantMessage = completion.choices[0].message.content;

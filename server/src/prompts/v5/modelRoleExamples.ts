@@ -1,4 +1,4 @@
-const examples = `
+const modelRoleExamples = `
 ***COACHING ROLE***
 • Example of when to use this role: 
     - You’re teaching a lesson in a programming class on writing algorithms. A student is trying to code a specific function but keeps running into errors. The Coaching role is ideal in this case. You work directly with the student, reviewing their code line-by-line, helping them debug the errors, and providing tailored suggestions on how to improve the function.
@@ -24,4 +24,4 @@ const examples = `
     - You’re tutoring a student in your language course who is just beginning to understand basic grammar rules and vocabulary. This student is still in the Reflective Observation phase, processing new language concepts. The Evaluator role would not be helpful because they are not ready to be assessed on their language skills yet. Instead, you should adopt the Coaching role, providing supportive, one-on-one guidance as they practice and reinforce foundational language skills.
 `
 
-export default examples;
+export default modelRoleExamples;
