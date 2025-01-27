@@ -14,7 +14,6 @@ const structuredOutput = {
             "beginner",
             "intermediate",
             "advanced",
-            "expert"
           ]
         },
         "student_details": {
