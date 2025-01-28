@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import ChatPage from 'components/ChatPage';
 import { v4 as uuidv4 } from 'uuid';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,6 +8,10 @@ import { lightTheme, darkTheme } from './components/createTheme';
 import IconButton from '@mui/material/IconButton';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+
+// components
+import ChatUI from 'components/chatPage';
+import OpenSummary from './components/summary/summary';
 
 // Generate or retrieve a unique session ID
 const getSessionId = (): string => {
@@ -34,14 +37,13 @@ function App() {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <div style={{  margin: '20px' }}>
+      <div style={{  margin: '20px', position: 'relative' }}>
         {/* Icon Button to Toggle Dark/Light Mode */}
         <IconButton onClick={toggleDarkMode} color="inherit">
           {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
         </IconButton>
-
-        {/* Your Chat Page */}
-        <ChatPage sessionId={sessionId} />
+        <OpenSummary sessionId={sessionId}/>
+        <ChatUI sessionId={sessionId} />
       </div>
     </ThemeProvider>
   );

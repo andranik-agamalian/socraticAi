@@ -5,7 +5,6 @@ import { useOpenAI } from "../hooks/useOpenAI";
 import { v4 as uuidv4 } from "uuid";
 import { ChatUIProps, Message } from '../utils/chatTypes';
 import OpenSummary from './summary/summary';
-
 import { TextField, IconButton, Typography, Avatar, Stack, Container} from "@mui/material";
 import { IoSend } from "react-icons/io5";
 import { 
@@ -80,7 +79,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
 
   return (
     <div>
-
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <ChatContainer>
           <MessagesContainer>
@@ -136,7 +134,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
           </InputContainer>
         </ChatContainer>
       </Container>
-      <OpenSummary sessionId={sessionId}/>
     </div>
   );
 };
