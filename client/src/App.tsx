@@ -13,6 +13,8 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import ChatUI from 'components/chatPage';
 import OpenSummary from './components/summary/summary';
 
+import './App.styles.css';
+
 // Generate or retrieve a unique session ID
 const getSessionId = (): string => {
   let sessionId: string | null = localStorage.getItem('sessionId');
