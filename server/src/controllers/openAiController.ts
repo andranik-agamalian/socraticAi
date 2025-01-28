@@ -63,9 +63,7 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
     chatHistory.push({ role: "assistant", content: assistantMessage });
 
     // Save updated chatHistory back to Redis with a TTL (e.g., 1 hour)
-    // await redisClient.set(sessionId, JSON.stringify(chatHistory), { EX: 3600 });
-    await redisClient.set(sessionId, JSON.stringify(chatHistory), { EX: 3600});
-
+    await redisClient.set(sessionId, JSON.stringify(chatHistory), { EX: 3600 });
 
     res.locals.responseMessage = assistantMessage;
 
