@@ -1,7 +1,8 @@
 import OpenAI from "openai";
 import { Request, Response, NextFunction } from "express";
 import redisClient from "../utils/redisClient.js";
-import systemPrompt from "../prompts/v1/systemPrompt.ts";
+import systemPrompt from "../prompts/v5/systemPrompt.ts";
+import structuredOutput from '../prompts/v5/structuredOutput.ts';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -31,10 +32,32 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
       model: "gpt-4o", // Change to gpt-4o-mini?
       store: true,
       messages: chatHistory,
+      temperature: 0.7,
+      response_format: { //added response format for structured output
+        type: "json_schema",
+        json_schema: structuredOutput
+      }
     });
 
+    console.log('completion w/ structured output --->', completion)
+
+    let assistantMessage;
+    let userProfile;
+
+    if(completion.choices[0].message.content){
+      const result = JSON.parse(completion.choices[0].message.content)
+      assistantMessage = result.response;
+      userProfile = result;
+      // console.log('completion result', result)
+    }
+
+    // console.log('assistantMessage --->', assistantMessage)
+    console.log('userProfile output --->', userProfile)
+    console.log('users correct score --->', userProfile.correct_count)
+    console.log('users incorrect score --->', userProfile.incorrect_count)
+
     // Get the assistant's response
-    const assistantMessage = completion.choices[0].message.content;
+    // const assistantMessage = completion.choices[0].message.content;
 
     // Update chatHistory with the assistant's response
     chatHistory.push({ role: "assistant", content: assistantMessage });
