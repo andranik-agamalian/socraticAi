@@ -138,7 +138,7 @@ const OpenDialogButton: React.FC<ChatUIProps> = ({sessionId}) => {
     <div className="summary-wrapper25">
       {/* Button to open the dialog */}
       <Button variant="contained" color="primary" onClick={handleOpen}>
-        Create Summary
+        Summary
       </Button>
 
       {/* Dialog component */}
