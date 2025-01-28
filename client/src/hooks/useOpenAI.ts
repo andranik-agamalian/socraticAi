@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { chat } from "../api";
 
-export const useOpenAI = (sessionId) => {
+export const useOpenAI = (sessionId: string) => {
   const [responseMessage, setResponseMessage] = useState("");
 
   const send = async (message: string) => {
@@ -9,8 +9,9 @@ export const useOpenAI = (sessionId) => {
 
     // TODO: Handle error if response.status !== 200
     const data = await response.json();
-
-    setResponseMessage(data.responseMessage);
+    const cleanMessage = JSON.parse(data.responseMessage);
+    console.log('Responding message', JSON.parse(data.responseMessage))
+    setResponseMessage(cleanMessage.response);
   };
 
   const resetResponsMessage = () => {
