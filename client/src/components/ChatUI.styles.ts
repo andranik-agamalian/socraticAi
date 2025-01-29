@@ -41,17 +41,17 @@ export const MessageBubble = styled(Box, {
 
 export const MessageContent = styled(Paper, {
   shouldForwardProp: (prop) => prop !== 'isUser',
-})<{ isUser: boolean }>(({ isUser }) => ({
+})<{ isUser: boolean }>(({ theme, isUser }) => ({
   padding: '12px 16px',
   borderRadius: '16px',
   maxWidth: '100%',
   width: "100%",
   marginLeft: isUser ? 0 : '12px',
   marginRight: isUser ? '12px' : 0,
-  background: isUser  
-  ? 'linear-gradient(to right, #162337, #1e1e1e)' // Gradient for user messages
-  : 'linear-gradient(to right, #1e1e1e, #223952)',
-  color: isUser ? '#fff' : '#fff',
+  background: theme.palette.mode === 'dark' 
+  ? (isUser ? 'linear-gradient(to right, #223952, #1e1e1e)' : 'linear-gradient(to right, #1e1e1e, #223952)') 
+  : (isUser ? 'linear-gradient(to right, #ececec, #BFBFBF)' : 'linear-gradient(to right, #BFBFBF, #ececec)'),
+  color: theme.palette.mode === 'dark' ? '#fff' : '#000',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
     transform: 'scale(1.02)',

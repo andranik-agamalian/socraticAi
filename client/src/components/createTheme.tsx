@@ -22,10 +22,10 @@ const lightTheme = createTheme({
       main: '#2953A6',
     },
     background: {
-      paper: '#cccccc',
+      paper: '#BFBFBF',
     },
     gradient: {
-      background: 'linear-gradient(135deg, #1E2D59, #442975)',
+      background: 'linear-gradient(0deg, #F2F2F2, #BFBFBF)',
     },
   },
 });
@@ -38,7 +38,7 @@ const darkTheme = createTheme({
       main: '#2196f3',
     },
     gradient: {
-      background: 'linear-gradient(135deg, #141E30, #243B55)',
+      background: 'linear-gradient(180deg, #141E30, #243B55)',
     },
   },
 });
