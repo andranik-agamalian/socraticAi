@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { lightTheme, darkTheme } from './components/createTheme';
 
@@ -29,7 +29,7 @@ const getSessionId = (): string => {
 const sessionId = getSessionId();
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Toggle between light/dark mode
   const toggleDarkMode = () => {
@@ -39,7 +39,8 @@ function App() {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <div style={{  margin: '20px', position: 'relative' }}>
+      <GradientBackground>
+      <div style={{ width: "100%",  margin: '20px', position: 'relative' }}>
         {/* Icon Button to Toggle Dark/Light Mode */}
         <IconButton onClick={toggleDarkMode} color="inherit">
           {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
@@ -47,8 +48,31 @@ function App() {
         <OpenSummary sessionId={sessionId}/>
         <ChatUI sessionId={sessionId} />
       </div>
+      </GradientBackground>
     </ThemeProvider>
   );
 }
+
+// Gradient Background Wrapper
+const GradientBackground = ({ children }: { children: React.ReactNode }) => {
+  const theme = useTheme(); // Access the current theme
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: theme.palette.gradient.background, // Use the gradient from the theme
+        color: theme.palette.text.primary, // Ensure text is readable
+        padding: '20px',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default App;

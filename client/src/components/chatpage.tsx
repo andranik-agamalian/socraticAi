@@ -4,7 +4,6 @@ import { createCurrentTimestamp } from "../utils";
 import { useOpenAI } from "../hooks/useOpenAI";
 import { v4 as uuidv4 } from "uuid";
 import { ChatUIProps, Message } from '../utils/chatTypes';
-import OpenSummary from './summary/summary';
 import { TextField, IconButton, Typography, Avatar, Stack, Container} from "@mui/material";
 import { IoSend } from "react-icons/io5";
 import { 
@@ -68,7 +67,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
       send(newMessage);
     }
   };
-  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -79,7 +77,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
 
   return (
     <div>
-      <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Container maxWidth="lg" sx={{ mt: 4, paddingLeft: 0, paddingRight: 0, }}>
         <ChatContainer>
           <MessagesContainer>
             {messages.map((message) => (
@@ -126,6 +124,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
                   backgroundColor: "#2196f3",
                   color: "#fff",
                   "&:hover": { backgroundColor: "#1976d2" },
+                  "max-height": "40px",
                 }}
               >
                 <IoSend />

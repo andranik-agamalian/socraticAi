@@ -10,6 +10,7 @@ export const ChatContainer = styled(Paper)(({ theme }) => ({
   borderRadius: 16,
   overflow: 'hidden',
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+  backgroundColor: theme.palette.background.paper, // Match the theme's paper background
 }));
 
 export const MessagesContainer = styled(Box)({
@@ -33,6 +34,7 @@ export const MessageBubble = styled(Box, {
 })<{ isUser: boolean }>(({ isUser }) => ({
   display: 'flex',
   alignItems: 'flex-start',
+  "flex-wrap": "wrap",
   marginBottom: '16px',
   flexDirection: isUser ? 'row-reverse' : 'row',
 }));
@@ -42,11 +44,14 @@ export const MessageContent = styled(Paper, {
 })<{ isUser: boolean }>(({ isUser }) => ({
   padding: '12px 16px',
   borderRadius: '16px',
-  maxWidth: '70%',
+  maxWidth: '100%',
+  width: "100%",
   marginLeft: isUser ? 0 : '12px',
   marginRight: isUser ? '12px' : 0,
-  backgroundColor: isUser ? '#2196f3' : '#f5f5f5',
-  color: isUser ? '#fff' : '#000',
+  background: isUser  
+  ? 'linear-gradient(to right, #294BA5, #1e1e1e)' // Gradient for user messages
+  : 'linear-gradient(to right, #1e1e1e, #412E7C)',
+  color: isUser ? '#fff' : '#fff',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
     transform: 'scale(1.02)',
