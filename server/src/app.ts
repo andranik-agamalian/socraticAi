@@ -2,7 +2,7 @@ import express, { ErrorRequestHandler } from "express";
 import cors from "cors";
 import 'dotenv/config';
 import bodyParser from "body-parser";
-import { openAiController } from './controllers/openAiController.ts'
+import { sendOpenAiChatMessage, generateSummary } from './controllers/openAiController.ts'
 import { ServerError } from './types.ts'
 
 const app = express();
@@ -16,14 +16,24 @@ app.get("/", (_req, res) => {
     res.send("Hello World!");
 });
 
-app.post("/api/v1/chat", openAiController, (req, res) => {
-    // @ts-ignore
-    const { responseMessage } = res.locals;
+app.post("/api/v1/chat", sendOpenAiChatMessage, (req, res) => {
+  // @ts-ignore
+  const { responseMessage } = res.locals;
 
-    res.status(200).json({
-        responseMessage
-    });
+  res.status(200).json({
+      responseMessage
+  });
 })
+
+app.post("/api/v1/summary", generateSummary, (req, res) => {
+  // @ts-ignore
+  const { sessionSummary } = res.locals;
+
+  res.status(200).json({
+      sessionSummary
+  });
+});
+
 
 const errorHandler: ErrorRequestHandler = (
     err: ServerError,
