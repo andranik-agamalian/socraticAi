@@ -1,0 +1,13 @@
+ul, ol {
+    padding-inline-start: 20px;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+    body, p, ul, li {
+        font-size: 0.8rem;
+    }
+    h3 {
+        font-size: 1.1rem;
+    }
+}
