@@ -10,3 +10,11 @@ export const chat = (message: string, sessionId: string) => {
     headers,
   });
 };
+
+export const summary = (sessionId: string) => {
+  return fetch(`${BASE_URL}/summary`, {
+    method: "POST",
+    body: JSON.stringify({ sessionId }),
+    headers,
+  });
+};

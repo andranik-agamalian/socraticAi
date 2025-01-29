@@ -49,8 +49,8 @@ export const MessageContent = styled(Paper, {
   marginLeft: isUser ? 0 : '12px',
   marginRight: isUser ? '12px' : 0,
   background: isUser  
-  ? 'linear-gradient(to right, #294BA5, #1e1e1e)' // Gradient for user messages
-  : 'linear-gradient(to right, #1e1e1e, #412E7C)',
+  ? 'linear-gradient(to right, #162337, #1e1e1e)' // Gradient for user messages
+  : 'linear-gradient(to right, #1e1e1e, #223952)',
   color: isUser ? '#fff' : '#fff',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
