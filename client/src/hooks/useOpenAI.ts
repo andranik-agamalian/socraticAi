@@ -10,10 +10,9 @@ export const useOpenAI = (sessionId: string) => {
 
     // TODO: Handle error if response.status !== 200
     const data = await response.json();
-    const cleanMessage = JSON.parse(data.responseMessage);
-    console.log('Responding message', JSON.parse(data.responseMessage))
-    setResponseMessage(cleanMessage.response);
-    setResponseMessageSummary(cleanMessage);
+
+    setResponseMessage(data.responseMessage);
+    setResponseMessageSummary(data);
   };
 
   const resetResponsMessage = () => {
