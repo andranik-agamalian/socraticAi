@@ -29,6 +29,7 @@ app.post("/api/v1/summary", generateSummary, (req, res) => {
   // @ts-ignore
   const { sessionSummary } = res.locals;
 
+  console.log('summary api', res.locals)
   res.status(200).json({
       sessionSummary
   });
