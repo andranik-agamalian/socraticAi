@@ -3,82 +3,17 @@ import Markdown from 'react-markdown';
 import { createCurrentTimestamp } from "../utils";
 import { useOpenAI } from "../hooks/useOpenAI";
 import { v4 as uuidv4 } from "uuid";
-
-import {
-  Box,
-  TextField,
-  IconButton,
-  Paper,
-  Typography,
-  Avatar,
-  Stack,
-  Container,
-} from "@mui/material";
-import { styled } from "@mui/system";
+import { ChatUIProps, Message } from '../utils/chatTypes';
+import { TextField, IconButton, Typography, Avatar, Stack, Container} from "@mui/material";
 import { IoSend } from "react-icons/io5";
+import { 
+  ChatContainer,
+  MessagesContainer,
+  MessageBubble,
+  MessageContent,
+  InputContainer,
+} from './ChatUI.styles';
 
-const ChatContainer = styled(Paper)(({ theme }) => ({
-  height: "80vh",
-  display: "flex",
-  flexDirection: "column",
-  borderRadius: 16,
-  overflow: "hidden",
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-}));
-
-const MessagesContainer = styled(Box)({
-  flex: 1,
-  overflowY: "auto",
-  padding: "20px",
-  "&::-webkit-scrollbar": {
-    width: "6px",
-  },
-  "&::-webkit-scrollbar-track": {
-    background: "#f1f1f1",
-  },
-  "&::-webkit-scrollbar-thumb": {
-    background: "#888",
-    borderRadius: "3px",
-  },
-});
-
-const MessageBubble = styled(Box)<{ isUser: boolean }>(({ isUser }) => ({
-  display: "flex",
-  alignItems: "flex-start",
-  marginBottom: "16px",
-  flexDirection: isUser ? "row-reverse" : "row",
-}));
-
-const MessageContent = styled(Paper)<{ isUser: boolean }>(({ isUser }) => ({
-  padding: "12px 16px",
-  borderRadius: "16px",
-  maxWidth: "70%",
-  marginLeft: isUser ? 0 : "12px",
-  marginRight: isUser ? "12px" : 0,
-  backgroundColor: isUser ? "#2196f3" : "#f5f5f5",
-  color: isUser ? "#fff" : "#000",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    transform: "scale(1.02)",
-  },
-}));
-
-const InputContainer = styled(Box)({
-  padding: "20px",
-  borderTop: "1px solid rgba(0, 0, 0, 0.1)",
-});
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: string;
-  avatar: string;
-}
-
-interface ChatUIProps {
-  sessionId: string;
-}
 
 const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -142,7 +77,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
       send(newMessage);
     }
   };
-  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -152,62 +86,64 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <ChatContainer>
-        <MessagesContainer>
-          {messages.map((message) => (
-            <MessageBubble key={message.id} isUser={message.isUser}>
-              <Avatar
-                src={`https://${message.avatar}`}
-                alt={message.isUser ? "User" : "Assistant"}
-                sx={{ width: 40, height: 40 }}
+    <div>
+      <Container maxWidth="lg" sx={{ mt: 4, paddingLeft: 0, paddingRight: 0, }}>
+        <ChatContainer>
+          <MessagesContainer>
+            {messages.map((message) => (
+              <MessageBubble key={message.id} isUser={message.isUser}>
+                <Avatar
+                  src={`https://${message.avatar}`}
+                  alt={message.isUser ? "User" : "Assistant"}
+                  sx={{ width: 40, height: 40 }}
+                />
+                <MessageContent isUser={message.isUser}>
+                  <Typography variant="body1" component="div">
+                    <Markdown>{message.text}</Markdown>
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ opacity: 0.7, mt: 0.5, display: "block" }}
+                  >
+                    {message.timestamp}
+                  </Typography>
+                </MessageContent>
+              </MessageBubble>
+            ))}
+            <div ref={messagesEndRef} />
+          </MessagesContainer>
+          <InputContainer>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                fullWidth
+                multiline
+                maxRows={4}
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type a message..."
+                variant="outlined"
+                size="small"
+                aria-label="Message input field"
               />
-              <MessageContent isUser={message.isUser}>
-                <Typography variant="body1" component="div">
-                  <Markdown>{message.text}</Markdown>
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ opacity: 0.7, mt: 0.5, display: "block" }}
-                >
-                  {message.timestamp}
-                </Typography>
-              </MessageContent>
-            </MessageBubble>
-          ))}
-          <div ref={messagesEndRef} />
-        </MessagesContainer>
-        <InputContainer>
-          <Stack direction="row" spacing={2}>
-            <TextField
-              fullWidth
-              multiline
-              maxRows={4}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type a message..."
-              variant="outlined"
-              size="small"
-              sx={{ backgroundColor: "#fff" }}
-              aria-label="Message input field"
-            />
-            <IconButton
-              onClick={handleSendMessage}
-              color="primary"
-              aria-label="Send message"
-              sx={{
-                backgroundColor: "#2196f3",
-                color: "#fff",
-                "&:hover": { backgroundColor: "#1976d2" },
-              }}
-            >
-              <IoSend />
-            </IconButton>
-          </Stack>
-        </InputContainer>
-      </ChatContainer>
-    </Container>
+              <IconButton
+                onClick={handleSendMessage}
+                color="primary"
+                aria-label="Send message"
+                sx={{
+                  backgroundColor: "#2196f3",
+                  color: "#fff",
+                  "&:hover": { backgroundColor: "#1976d2" },
+                  "max-height": "40px",
+                }}
+              >
+                <IoSend />
+              </IconButton>
+            </Stack>
+          </InputContainer>
+        </ChatContainer>
+      </Container>
+    </div>
   );
 };
 
