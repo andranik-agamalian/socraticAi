@@ -9,11 +9,14 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export const sendOpenAiChatMessage = async (req: Request, res: Response, next: NextFunction) => {
   const { message, sessionId } = req.body;
 
-  // Fetch chatHistory from Redis
+  // Fetch chatHistory and userProfiles from Redis
   let chatHistory = [];
-  const cachedChatHistory = await redisClient.get(sessionId);
-  if (cachedChatHistory) {
-    chatHistory = JSON.parse(cachedChatHistory);
+  let userProfiles = [];
+  const cachedData = await redisClient.get(sessionId);
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData);
+    chatHistory = parsedData.chatHistory || [];
+    userProfiles = parsedData.userProfiles || [];
   }
 
   // If chatHistory is empty, initialize with the system prompt
@@ -39,31 +42,26 @@ export const sendOpenAiChatMessage = async (req: Request, res: Response, next: N
       }
     });
 
-    console.log('completion w/ structured output --->', completion)
+    console.log('\ncompletion w/ structured output --->', completion)
 
     let assistantMessage;
-    let userProfile;
 
     if(completion.choices[0].message.content){
       const result = JSON.parse(completion.choices[0].message.content)
       assistantMessage = result.response;
-      userProfile = result;
+      userProfiles.push(result); // Append the new userProfile to the array
       // console.log('completion result', result)
     }
 
-    // console.log('assistantMessage --->', assistantMessage)
-    console.log('userProfile output --->', userProfile)
-    console.log('users correct score --->', userProfile.correct_count)
-    console.log('users incorrect score --->', userProfile.incorrect_count)
-
-    // Get the assistant's response
-    // const assistantMessage = completion.choices[0].message.content;
+    console.log('\nassistantMessage --->', assistantMessage)
+    console.log('\nuserProfiles output --->', userProfiles)
 
     // Update chatHistory with the assistant's response
     chatHistory.push({ role: 'assistant', content: assistantMessage });
 
-    // Save updated chatHistory back to Redis with a TTL (e.g., 1 hour)
-    await redisClient.set(sessionId, JSON.stringify(chatHistory), { EX: 360000 });
+    // Save updated chatHistory and userProfiles back to Redis with a TTL (e.g., 1 hour)
+    const dataToStore = JSON.stringify({ chatHistory, userProfiles });
+    await redisClient.set(sessionId, dataToStore, { EX: 360000 });
 
     res.locals.responseMessage = assistantMessage;
 
@@ -78,14 +76,18 @@ export const generateSummary = async (req: Request, res: Response, next: NextFun
 
   const { sessionId } = req.body;
 
-  // Fetch chatHistory from Redis
+  // Fetch chatHistory and userProfiles from Redis
   let chatHistory = [];
-  const cachedChatHistory = await redisClient.get(sessionId);
-  if (cachedChatHistory) {
-    chatHistory = JSON.parse(cachedChatHistory);
+  let userProfiles = [];
+  const cachedData = await redisClient.get(sessionId);
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData);
+    chatHistory = parsedData.chatHistory || [];
+    userProfiles = parsedData.userProfiles || [];
   }
 
   console.log('Chat history for summary:', chatHistory);
+  console.log('User profiles for summary:', userProfiles);
 
   const summaryPrompt = `
     Analyze the following session log and generate:
@@ -96,7 +98,10 @@ export const generateSummary = async (req: Request, res: Response, next: NextFun
     Provide actionable feedback for their next session.
 
     Session Log:
-    ${chatHistory}
+    ${JSON.stringify(chatHistory)}
+
+    User Profiles Aggregated after each message:
+    ${JSON.stringify(userProfiles)}
   `
 
   try {
