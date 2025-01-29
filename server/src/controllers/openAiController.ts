@@ -96,7 +96,7 @@ export const generateSummary = async (req: Request, res: Response, next: NextFun
     Provide actionable feedback for their next session.
 
     Session Log:
-    ${chatHistory}
+    ${JSON.stringify(chatHistory)}
   `
 
   try {
