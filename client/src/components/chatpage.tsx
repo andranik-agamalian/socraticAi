@@ -3,6 +3,8 @@ import Markdown from 'react-markdown';
 import { createCurrentTimestamp } from "../utils";
 import { useOpenAI } from "../hooks/useOpenAI";
 import { v4 as uuidv4 } from "uuid";
+import { useVoiceControls } from "../hooks/useVoiceControls";
+import VoiceControls from "./VoiceControls";
 
 import {
   Box,
@@ -85,6 +87,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
   const { send, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
+  const [textToSpeechEnabled, setTextToSpeechEnabled] = useState(false);
+  const { isListening, isSpeaking, startRecording, stopRecording, speak } = useVoiceControls();
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -108,6 +112,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
           avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
         },
       ]);
+      
+      if (textToSpeechEnabled) {
+        speak(responseMessage);
+      }
+      
       resetResponsMessage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,6 +190,25 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
               size="small"
               sx={{ backgroundColor: "#fff" }}
               aria-label="Message input field"
+            />
+            <VoiceControls
+              isListening={isListening}
+              isSpeaking={isSpeaking}
+              onStartListening={async () => {
+                console.log('Start listening clicked');
+                if (!isListening) {
+                  await startRecording();
+                }
+              }}
+              onStopListening={async () => {
+                console.log('Stop listening clicked');
+                if (isListening) {
+                  const transcript = await stopRecording();
+                  console.log('Got transcript:', transcript);
+                  setNewMessage(transcript);
+                }
+              }}
+              onToggleSpeech={() => setTextToSpeechEnabled(!textToSpeechEnabled)}
             />
             <IconButton
               onClick={handleSendMessage}

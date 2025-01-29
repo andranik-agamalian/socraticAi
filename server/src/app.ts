@@ -2,8 +2,9 @@ import express, { ErrorRequestHandler } from "express";
 import cors from "cors";
 import 'dotenv/config';
 import bodyParser from "body-parser";
-import { openAiController } from './controllers/openAiController.ts'
-import { ServerError } from './types.ts'
+import { openAiController, transcribeAudio, textToSpeech } from './controllers/openAiController.js'
+import { ServerError } from './types.js'
+import multer from 'multer';
 
 const app = express();
 
@@ -11,6 +12,22 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded())
 app.use(bodyParser.json())
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 25 * 1024 * 1024, // 25MB limit
+  },
+  fileFilter: (_req, file, cb) => {
+    // Accept audio files
+    if (file.mimetype.startsWith('audio/')) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+      cb(new Error('Only audio files are allowed'));
+    }
+  }
+});
 
 app.get("/", (_req, res) => {
     res.send("Hello World!");
@@ -24,6 +41,9 @@ app.post("/api/v1/chat", openAiController, (req, res) => {
         responseMessage
     });
 })
+
+app.post("/api/v1/transcribe", upload.single('audio'), transcribeAudio);
+app.post("/api/v1/text-to-speech", textToSpeech);
 
 const errorHandler: ErrorRequestHandler = (
     err: ServerError,

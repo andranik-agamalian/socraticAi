@@ -1,8 +1,10 @@
 import OpenAI from "openai";
 import { Request, Response, NextFunction } from "express";
 import redisClient from "../utils/redisClient.js";
-import systemPrompt from "../prompts/v5/systemPrompt.ts";
-import structuredOutput from '../prompts/v5/structuredOutput.ts';
+import systemPrompt from "../prompts/v5/systemPrompt.js";
+import structuredOutput from '../prompts/v5/structuredOutput.js';
+import fs from 'fs';
+import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -71,6 +73,71 @@ export const openAiController = async (req: Request, res: Response, next: NextFu
   } catch (error) {
     console.error("Error in OpenAI API call:", error);
     return next(error);
+  }
+};
+
+// speech to text and text to speech endpoints
+export const transcribeAudio = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    console.log('Received transcribe request');
+    const audioFile = req.file; 
+    
+    if (!audioFile) {
+      console.error('No audio file in request');
+      throw new Error('No audio file provided');
+    }
+
+    console.log('Audio file details:', {
+      fieldname: audioFile.fieldname,
+      originalname: audioFile.originalname,
+      mimetype: audioFile.mimetype,
+      size: audioFile.size
+    });
+
+    // Create a temporary file from the buffer
+    const tempFilePath = `/tmp/${Date.now()}.webm`;
+    await fs.promises.writeFile(tempFilePath, audioFile.buffer);
+
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(tempFilePath),
+      model: 'whisper-1',
+    });
+
+    // Clean up temp file
+    await fs.promises.unlink(tempFilePath);
+
+    console.log('Transcription successful:', transcription.text);
+    res.json({ text: transcription.text });
+  } catch (error) {
+    console.error("Error in Whisper API call:", error);
+    res.status(400).json({
+      err: error instanceof Error ? error.message : 'Transcription failed',
+      details: error
+    });
+  }
+};
+
+export const textToSpeech = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { text } = req.body;
+    if (!text) {
+      throw new Error('No text provided');
+    }
+
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "sage",
+      input: text,
+      speed: 1.20
+    });
+
+    // Convert to buffer and send
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    res.set('Content-Type', 'audio/mpeg');
+    res.send(buffer);
+  } catch (error) {
+    console.error("Error in TTS API call:", error);
+    next(error);
   }
 };
 
