@@ -13,7 +13,7 @@ const structuredOutput = {
           "enum": [
             "beginner",
             "intermediate",
-            "advanced"
+            "advanced",
           ]
         },
         "student_details": {
@@ -33,17 +33,39 @@ const structuredOutput = {
               "items": {
                 "type": "string"
               }
-            }
+            },
+            "learning_style": {
+              "type": "string",
+              "description": "The students learning style",
+              "enum":[
+                "Diverging",
+                "Assimilating",
+                "Accommodating",
+                "Converging"
+              ]
+            },
           },
           "required": [
             "likes",
-            "learning_preferences"
+            "learning_preferences",
+            "learning_style"
           ],
           "additionalProperties": false
         },
+
         "topic": {
           "type": "string",
           "description": "The topic the student would like to learn about."
+        },
+        "ai_role": {
+          "type": "string",
+          "description": "These are you're roles",
+          "enum":[
+            "Coaching Role",
+            "Facilitator Role",
+            "Expert Role",
+            "Evaluator Role"
+          ]
         },
         "session_report": {
           "type": "object",
@@ -97,9 +119,10 @@ const structuredOutput = {
         "student_level",
         "student_details",
         "topic",
+        "ai_role",
         "session_report",
         "correct_count",
-        "incorrect_count"
+        "incorrect_count",
       ],
       "additionalProperties": false
     },
