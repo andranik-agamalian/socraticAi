@@ -92,6 +92,16 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
     }
   };
 
+  const didInit = useRef(false);
+
+  useEffect(() => {
+    if (!didInit.current) {
+      didInit.current = true;
+      send("");
+    }
+  }, []);
+
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
