@@ -96,7 +96,7 @@ const OpenSummary: React.FC<ChatUIProps> = ({ sessionId }) => {
             >
                 {options.map((option) => (
                     <MenuItem key={option} selected={option === 'Pyxis'} 
-                    onClick={option === "Summary" ? handleSummaryClick : handleClose}>
+                    onClick={option === "Session Summary" ? handleSummaryClick : handleClose}>
                         {option}
                     </MenuItem>
                 ))}
