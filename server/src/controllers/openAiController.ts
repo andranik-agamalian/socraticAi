@@ -29,7 +29,16 @@ export const sendOpenAiChatMessage = async (req: Request, res: Response, next: N
   // Add the user's new message to chatHistory
   chatHistory.push({ role: 'user', content: message });
 
-  console.log('Chat history:', chatHistory);
+  // Include the latest userProfile in the chat history
+  if (userProfiles.length > 0) {
+    const latestUserProfile = userProfiles[userProfiles.length - 1];
+    const userProfileMessage = 
+      `This is the User's Profile after the last question.  
+      Please use this information to shape how you ask your next followup question. 
+      User Profile: ${JSON.stringify(latestUserProfile)}`;
+      
+    chatHistory.push({ role: 'system', content: userProfileMessage });
+  }
 
   try {
     // Send the chatHistory to OpenAI
@@ -44,7 +53,7 @@ export const sendOpenAiChatMessage = async (req: Request, res: Response, next: N
       }
     });
 
-    console.log('\ncompletion w/ structured output --->', completion)
+    // console.log('\ncompletion w/ structured output --->', completion)
 
     let assistantMessage;
 
@@ -52,18 +61,17 @@ export const sendOpenAiChatMessage = async (req: Request, res: Response, next: N
       const result = JSON.parse(completion.choices[0].message.content)
       assistantMessage = result.response;
       userProfiles.push(result); // Append the new userProfile to the array
-      // console.log('completion result', result)
+      console.log('completion result', result)
     }
-
-    console.log('\nassistantMessage --->', assistantMessage)
-    console.log('\nuserProfiles output --->', userProfiles)
 
     // Update chatHistory with the assistant's response
     chatHistory.push({ role: 'assistant', content: assistantMessage });
 
+    // console.log('Chat history:', chatHistory);
+
     // Save updated chatHistory and userProfiles back to Redis with a TTL (e.g., 1 hour)
     const dataToStore = JSON.stringify({ chatHistory, userProfiles });
-    await redisClient.set(sessionId, dataToStore, { EX: 360000 });
+    await redisClient.set(sessionId, dataToStore, { EX: 3600 });
 
     res.locals.responseMessage = assistantMessage;
 
@@ -96,6 +104,7 @@ export const generateSummary = async (req: Request, res: Response, next: NextFun
       1. Key insights about the learner's strengths.
       2. Patterns observed in their responses.
       3. Specific areas where they need improvement.
+      4. Expalin the learner's learning style.
 
     Provide actionable feedback for their next session.
 
