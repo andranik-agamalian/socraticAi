@@ -23,6 +23,8 @@ import {
   InputContainer,
 } from './ChatUI.styles';
 
+import { useTheme } from "@mui/material/styles";
+
 const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -38,6 +40,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   };
 
   const didInit = useRef(false);
+
+  const theme = useTheme();
 
   useEffect(() => {
     if (!didInit.current) {
@@ -136,7 +140,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
               placeholder="Type a message..."
               variant="outlined"
               size="small"
-              sx={{ backgroundColor: "#fff" }}
+              sx={{ backgroundColor: theme.palette.mode === "dark" ? "#151f31" : "#eaeaea", }}
               aria-label="Message input field"
             />
             <VoiceControls
