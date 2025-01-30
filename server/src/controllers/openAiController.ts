@@ -8,73 +8,123 @@ import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export const openAiController = async (req: Request, res: Response, next: NextFunction) => {
+export const sendOpenAiChatMessage = async (req: Request, res: Response, next: NextFunction) => {
   const { message, sessionId } = req.body;
 
-  // Fetch chatHistory from Redis
+  // Fetch chatHistory and userProfiles from Redis
   let chatHistory = [];
-  const cachedChatHistory = await redisClient.get(sessionId);
-  if (cachedChatHistory) {
-    chatHistory = JSON.parse(cachedChatHistory);
+  let userProfiles = [];
+  const cachedData = await redisClient.get(sessionId);
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData);
+    chatHistory = parsedData.chatHistory || [];
+    userProfiles = parsedData.userProfiles || [];
   }
 
   // If chatHistory is empty, initialize with the system prompt
   if (chatHistory.length === 0) {
-    chatHistory.push({ role: "system", content: systemPrompt });
+    chatHistory.push({ role: 'system', content: systemPrompt });
   }
 
   // Add the user's new message to chatHistory
-  chatHistory.push({ role: "user", content: message });
+  chatHistory.push({ role: 'user', content: message });
 
-  console.log("Chat history:", chatHistory);
+  console.log('Chat history:', chatHistory);
 
   try {
     // Send the chatHistory to OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Change to gpt-4o-mini?
+      model: 'gpt-4o', // Change to gpt-4o-mini?
       store: true,
       messages: chatHistory,
       temperature: 0.7,
       response_format: { //added response format for structured output
-        type: "json_schema",
+        type: 'json_schema',
         json_schema: structuredOutput
       }
     });
 
-    console.log('completion w/ structured output --->', completion)
+    console.log('\ncompletion w/ structured output --->', completion)
 
     let assistantMessage;
-    let userProfile;
 
     if(completion.choices[0].message.content){
       const result = JSON.parse(completion.choices[0].message.content)
       assistantMessage = result.response;
-      userProfile = result;
+      userProfiles.push(result); // Append the new userProfile to the array
       // console.log('completion result', result)
     }
 
-    // console.log('assistantMessage --->', assistantMessage)
-    console.log('userProfile output --->', userProfile)
-    console.log('users correct score --->', userProfile.correct_count)
-    console.log('users incorrect score --->', userProfile.incorrect_count)
-
-    // Get the assistant's response
-    // const assistantMessage = completion.choices[0].message.content;
+    console.log('\nassistantMessage --->', assistantMessage)
+    console.log('\nuserProfiles output --->', userProfiles)
 
     // Update chatHistory with the assistant's response
-    chatHistory.push({ role: "assistant", content: assistantMessage });
+    chatHistory.push({ role: 'assistant', content: assistantMessage });
 
-    // Save updated chatHistory back to Redis with a TTL (e.g., 1 hour)
-    await redisClient.set(sessionId, JSON.stringify(chatHistory), { EX: 3600 });
+    // Save updated chatHistory and userProfiles back to Redis with a TTL (e.g., 1 hour)
+    const dataToStore = JSON.stringify({ chatHistory, userProfiles });
+    await redisClient.set(sessionId, dataToStore, { EX: 360000 });
 
     res.locals.responseMessage = assistantMessage;
 
     return next();
   } catch (error) {
-    console.error("Error in OpenAI API call:", error);
+    console.error('Error in OpenAI API call:', error);
     return next(error);
   }
 };
+
+export const generateSummary = async (req: Request, res: Response, next: NextFunction) => {
+
+  const { sessionId } = req.body;
+
+  // Fetch chatHistory and userProfiles from Redis
+  let chatHistory = [];
+  let userProfiles = [];
+  const cachedData = await redisClient.get(sessionId);
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData);
+    chatHistory = parsedData.chatHistory || [];
+    userProfiles = parsedData.userProfiles || [];
+  }
+
+  console.log('Chat history for summary:', chatHistory);
+  console.log('User profiles for summary:', userProfiles);
+
+  const summaryPrompt = `
+    Analyze the following session log and generate:
+      1. Key insights about the learner's strengths.
+      2. Patterns observed in their responses.
+      3. Specific areas where they need improvement.
+
+    Provide actionable feedback for their next session.
+
+    Session Log:
+    ${JSON.stringify(chatHistory)}
+
+    User Profiles Aggregated after each message:
+    ${JSON.stringify(userProfiles)}
+  `
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      store: true,
+      messages: [
+        { role: 'system', content: summaryPrompt }
+      ]
+    });
+
+    const summary = completion.choices[0]?.message?.content;
+
+    res.locals.sessionSummary = summary;
+
+    return next();
+  } catch (error) {
+    console.error('Error in OpenAI API call:', error);
+    return next(error);
+  }
+}
 
 // speech to text and text to speech endpoints
 export const transcribeAudio = async (req: Request, res: Response, next: NextFunction) => {

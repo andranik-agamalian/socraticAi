@@ -2,7 +2,7 @@ import express, { ErrorRequestHandler } from "express";
 import cors from "cors";
 import 'dotenv/config';
 import bodyParser from "body-parser";
-import { openAiController, transcribeAudio, textToSpeech } from './controllers/openAiController.js'
+import { sendOpenAiChatMessage, transcribeAudio, textToSpeech, generateSummary } from './controllers/openAiController.js'
 import { ServerError } from './types.js'
 import multer from 'multer';
 
@@ -33,7 +33,7 @@ app.get("/", (_req, res) => {
     res.send("Hello World!");
 });
 
-app.post("/api/v1/chat", openAiController, (req, res) => {
+app.post("/api/v1/chat", sendOpenAiChatMessage, (req, res) => {
     // @ts-ignore
     const { responseMessage } = res.locals;
 
@@ -44,6 +44,15 @@ app.post("/api/v1/chat", openAiController, (req, res) => {
 
 app.post("/api/v1/transcribe", upload.single('audio'), transcribeAudio);
 app.post("/api/v1/text-to-speech", textToSpeech);
+app.post("/api/v1/summary", generateSummary, (req, res) => {
+    // @ts-ignore
+    const { sessionSummary } = res.locals;
+
+    console.log('summary api', res.locals)
+    res.status(200).json({
+        sessionSummary
+    });
+});
 
 const errorHandler: ErrorRequestHandler = (
     err: ServerError,
@@ -61,6 +70,6 @@ const errorHandler: ErrorRequestHandler = (
     res.status(errorObj.status).json(errorObj.message);
   };
   
-  app.use(errorHandler);
+app.use(errorHandler);
 
 export default app;

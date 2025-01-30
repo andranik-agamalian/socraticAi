@@ -45,3 +45,11 @@ export const textToSpeech = async (text: string): Promise<ArrayBuffer> => {
 };
 
 
+
+export const summary = (sessionId: string) => {
+  return fetch(`${BASE_URL}/summary`, {
+    method: "POST",
+    body: JSON.stringify({ sessionId }),
+    headers,
+  });
+};

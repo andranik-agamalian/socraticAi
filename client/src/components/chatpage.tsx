@@ -5,87 +5,28 @@ import { useOpenAI } from "../hooks/useOpenAI";
 import { v4 as uuidv4 } from "uuid";
 import { useVoiceControls } from "../hooks/useVoiceControls";
 import VoiceControls from "./VoiceControls";
-
 import {
-  Box,
   TextField,
   IconButton,
-  Paper,
   Typography,
   Avatar,
   Stack,
   Container,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { ChatUIProps, Message } from '../utils/chatTypes';
 import { IoSend } from "react-icons/io5";
-
-const ChatContainer = styled(Paper)(({ theme }) => ({
-  height: "80vh",
-  display: "flex",
-  flexDirection: "column",
-  borderRadius: 16,
-  overflow: "hidden",
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-}));
-
-const MessagesContainer = styled(Box)({
-  flex: 1,
-  overflowY: "auto",
-  padding: "20px",
-  "&::-webkit-scrollbar": {
-    width: "6px",
-  },
-  "&::-webkit-scrollbar-track": {
-    background: "#f1f1f1",
-  },
-  "&::-webkit-scrollbar-thumb": {
-    background: "#888",
-    borderRadius: "3px",
-  },
-});
-
-const MessageBubble = styled(Box)<{ isUser: boolean }>(({ isUser }) => ({
-  display: "flex",
-  alignItems: "flex-start",
-  marginBottom: "16px",
-  flexDirection: isUser ? "row-reverse" : "row",
-}));
-
-const MessageContent = styled(Paper)<{ isUser: boolean }>(({ isUser }) => ({
-  padding: "12px 16px",
-  borderRadius: "16px",
-  maxWidth: "70%",
-  marginLeft: isUser ? 0 : "12px",
-  marginRight: isUser ? "12px" : 0,
-  backgroundColor: isUser ? "#2196f3" : "#f5f5f5",
-  color: isUser ? "#fff" : "#000",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    transform: "scale(1.02)",
-  },
-}));
-
-const InputContainer = styled(Box)({
-  padding: "20px",
-  borderTop: "1px solid rgba(0, 0, 0, 0.1)",
-});
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: string;
-  avatar: string;
-}
-
-interface ChatUIProps {
-  sessionId: string;
-}
+import { 
+  ChatContainer,
+  MessagesContainer,
+  MessageBubble,
+  MessageContent,
+  InputContainer,
+} from './ChatUI.styles';
 
 const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { send, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
   const [textToSpeechEnabled, setTextToSpeechEnabled] = useState(false);
   const { isListening, isSpeaking, startRecording, stopRecording, speak } = useVoiceControls();
@@ -95,6 +36,15 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const didInit = useRef(false);
+
+  useEffect(() => {
+    if (!didInit.current) {
+      didInit.current = true;
+      send("");
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -126,7 +76,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
     if (newMessage.trim()) {
       setMessages([
         ...messages,
-        // populate state with message from user
         {
           id: uuidv4(),
           text: newMessage,
@@ -141,7 +90,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
       send(newMessage);
     }
   };
-  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -151,7 +99,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, paddingLeft: 0, paddingRight: 0 }}>
       <ChatContainer>
         <MessagesContainer>
           {messages.map((message) => (
@@ -218,6 +166,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
                 backgroundColor: "#2196f3",
                 color: "#fff",
                 "&:hover": { backgroundColor: "#1976d2" },
+                "maxHeight": "40px",
               }}
             >
               <IoSend />
