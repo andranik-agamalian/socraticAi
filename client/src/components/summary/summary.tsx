@@ -6,24 +6,21 @@ import { useOpenAI } from "../../hooks/useOpenAI";
 import Markdown from 'react-markdown';
 import { v4 as uuidv4 } from "uuid";
 import './summaryStyles.css';
-import { summaryPrompt } from "./summaryPrompt";
-
 
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-
+import { CircularProgress } from "@mui/material";
 
 const options = [
-    'Summary',
-    'Profile'
+    'Session Summary',
 ];
 
 const ITEM_HEIGHT = 48;
 
 const OpenSummary: React.FC<ChatUIProps> = ({ sessionId }) => {
-    const { getSummary, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
+    const { getSummary, isLoading, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
     const [messages, setMessages] = useState<Message[]>([]);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -31,7 +28,6 @@ const OpenSummary: React.FC<ChatUIProps> = ({ sessionId }) => {
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
-
     };
 
     // Handler for clicking on the 'Summary' MenuItem
@@ -66,6 +62,8 @@ const OpenSummary: React.FC<ChatUIProps> = ({ sessionId }) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [responseMessage]);
+
+    const latestMessage = messages[messages.length - 1]?.text;
 
     return (
         <div style={{ position: "absolute", right: 0, top: 0 }}>
@@ -107,7 +105,13 @@ const OpenSummary: React.FC<ChatUIProps> = ({ sessionId }) => {
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>Summary</DialogTitle>
                 <DialogContent>
-                    <Markdown>{messages[messages.length - 1]?.text || "No message yet"}</Markdown>
+                {isLoading ? (
+                <CircularProgress size={24} />
+                ) : latestMessage ? (
+                <Markdown>{latestMessage}</Markdown>
+                ) : (
+                    "No message yet"
+                )}
                 </DialogContent>
                 <DialogActions>
                 <Button onClick={handleDialogClose} color="secondary">
