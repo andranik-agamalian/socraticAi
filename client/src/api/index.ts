@@ -11,6 +11,41 @@ export const chat = (message: string, sessionId: string) => {
   });
 };
 
+export const transcribeAudio = async (audioFile: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('audio', audioFile);
+
+  const response = await fetch(`${BASE_URL}/transcribe`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Transcription failed:', errorText);
+    throw new Error('Transcription failed');
+  }
+
+  const data = await response.json();
+  return data.text;
+};
+
+export const textToSpeech = async (text: string): Promise<ArrayBuffer> => {
+  const response = await fetch(`${BASE_URL}/text-to-speech`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Text-to-speech failed');
+  }
+
+  return response.arrayBuffer();
+};
+
+
+
 export const summary = (sessionId: string) => {
   return fetch(`${BASE_URL}/summary`, {
     method: "POST",

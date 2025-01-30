@@ -3,8 +3,17 @@ import Markdown from 'react-markdown';
 import { createCurrentTimestamp } from "../utils";
 import { useOpenAI } from "../hooks/useOpenAI";
 import { v4 as uuidv4 } from "uuid";
+import { useVoiceControls } from "../hooks/useVoiceControls";
+import VoiceControls from "./VoiceControls";
+import {
+  TextField,
+  IconButton,
+  Typography,
+  Avatar,
+  Stack,
+  Container,
+} from "@mui/material";
 import { ChatUIProps, Message } from '../utils/chatTypes';
-import { TextField, IconButton, Typography, Avatar, Stack, Container} from "@mui/material";
 import { IoSend } from "react-icons/io5";
 import { 
   ChatContainer,
@@ -14,12 +23,15 @@ import {
   InputContainer,
 } from './ChatUI.styles';
 
+import { useTheme } from "@mui/material/styles";
 
 const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Explicit type for ref
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { send, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
+  const [textToSpeechEnabled, setTextToSpeechEnabled] = useState(false);
+  const { isListening, isSpeaking, startRecording, stopRecording, speak } = useVoiceControls();
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -29,13 +41,14 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
 
   const didInit = useRef(false);
 
+  const theme = useTheme();
+
   useEffect(() => {
     if (!didInit.current) {
       didInit.current = true;
       send("");
     }
   }, []);
-
 
   useEffect(() => {
     scrollToBottom();
@@ -53,6 +66,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
           avatar: "images.unsplash.com/photo-1494790108377-be9c29b29330",
         },
       ]);
+      
+      if (textToSpeechEnabled) {
+        speak(responseMessage);
+      }
+      
       resetResponsMessage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,7 +80,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
     if (newMessage.trim()) {
       setMessages([
         ...messages,
-        // populate state with message from user
         {
           id: uuidv4(),
           text: newMessage,
@@ -86,64 +103,82 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   };
 
   return (
-    <div>
-      <Container maxWidth="lg" sx={{ mt: 4, paddingLeft: 0, paddingRight: 0, }}>
-        <ChatContainer>
-          <MessagesContainer>
-            {messages.map((message) => (
-              <MessageBubble key={message.id} isUser={message.isUser}>
-                <Avatar
-                  src={`https://${message.avatar}`}
-                  alt={message.isUser ? "User" : "Assistant"}
-                  sx={{ width: 40, height: 40 }}
-                />
-                <MessageContent isUser={message.isUser}>
-                  <Typography variant="body1" component="div">
-                    <Markdown>{message.text}</Markdown>
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ opacity: 0.7, mt: 0.5, display: "block" }}
-                  >
-                    {message.timestamp}
-                  </Typography>
-                </MessageContent>
-              </MessageBubble>
-            ))}
-            <div ref={messagesEndRef} />
-          </MessagesContainer>
-          <InputContainer>
-            <Stack direction="row" spacing={2}>
-              <TextField
-                fullWidth
-                multiline
-                maxRows={4}
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type a message..."
-                variant="outlined"
-                size="small"
-                aria-label="Message input field"
+    <Container maxWidth="lg" sx={{ mt: 4, paddingLeft: 0, paddingRight: 0 }}>
+      <ChatContainer>
+        <MessagesContainer>
+          {messages.map((message) => (
+            <MessageBubble key={message.id} isUser={message.isUser}>
+              <Avatar
+                src={`https://${message.avatar}`}
+                alt={message.isUser ? "User" : "Assistant"}
+                sx={{ width: 40, height: 40 }}
               />
-              <IconButton
-                onClick={handleSendMessage}
-                color="primary"
-                aria-label="Send message"
-                sx={{
-                  backgroundColor: "#2196f3",
-                  color: "#fff",
-                  "&:hover": { backgroundColor: "#1976d2" },
-                  "max-height": "40px",
-                }}
-              >
-                <IoSend />
-              </IconButton>
-            </Stack>
-          </InputContainer>
-        </ChatContainer>
-      </Container>
-    </div>
+              <MessageContent isUser={message.isUser}>
+                <Typography variant="body1" component="div">
+                  <Markdown>{message.text}</Markdown>
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ opacity: 0.7, mt: 0.5, display: "block" }}
+                >
+                  {message.timestamp}
+                </Typography>
+              </MessageContent>
+            </MessageBubble>
+          ))}
+          <div ref={messagesEndRef} />
+        </MessagesContainer>
+        <InputContainer>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              fullWidth
+              multiline
+              maxRows={4}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              variant="outlined"
+              size="small"
+              sx={{ backgroundColor: theme.palette.mode === "dark" ? "#151f31" : "#eaeaea", }}
+              aria-label="Message input field"
+            />
+            <VoiceControls
+              isListening={isListening}
+              isSpeaking={isSpeaking}
+              onStartListening={async () => {
+                console.log('Start listening clicked');
+                if (!isListening) {
+                  await startRecording();
+                }
+              }}
+              onStopListening={async () => {
+                console.log('Stop listening clicked');
+                if (isListening) {
+                  const transcript = await stopRecording();
+                  console.log('Got transcript:', transcript);
+                  setNewMessage(transcript);
+                }
+              }}
+              onToggleSpeech={() => setTextToSpeechEnabled(!textToSpeechEnabled)}
+            />
+            <IconButton
+              onClick={handleSendMessage}
+              color="primary"
+              aria-label="Send message"
+              sx={{
+                backgroundColor: "#2196f3",
+                color: "#fff",
+                "&:hover": { backgroundColor: "#1976d2" },
+                "maxHeight": "40px",
+              }}
+            >
+              <IoSend />
+            </IconButton>
+          </Stack>
+        </InputContainer>
+      </ChatContainer>
+    </Container>
   );
 };
 

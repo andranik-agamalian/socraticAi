@@ -49,8 +49,8 @@ export const MessageContent = styled(Paper, {
   marginLeft: isUser ? 0 : '12px',
   marginRight: isUser ? '12px' : 0,
   background: theme.palette.mode === 'dark' 
-  ? (isUser ? 'linear-gradient(to right, #223952, #1e1e1e)' : 'linear-gradient(to right, #1e1e1e, #223952)') 
-  : (isUser ? 'linear-gradient(to right, #ececec, #BFBFBF)' : 'linear-gradient(to right, #BFBFBF, #ececec)'),
+  ? (isUser ? '#223773' : '#26479D')
+  : (isUser ? '#BFBFBF' : '#A6A6A6'),
   color: theme.palette.mode === 'dark' ? '#fff' : '#000',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
