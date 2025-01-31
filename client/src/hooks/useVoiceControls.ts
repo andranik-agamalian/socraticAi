@@ -4,6 +4,7 @@ import { transcribeAudio, textToSpeech } from '../api';
 export const useVoiceControls = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -66,7 +67,13 @@ export const useVoiceControls = () => {
     });
   }, []);
 
+  const toggleTts = () => {
+    setTtsEnabled(prev => !prev);
+  };
+
   const speak = useCallback(async (text: string) => {
+    if (!ttsEnabled) return; // Don't speak if TTS is disabled
+    
     try {
       setIsSpeaking(true);
       const audioBuffer = await textToSpeech(text);
@@ -84,13 +91,15 @@ export const useVoiceControls = () => {
       console.error('Text-to-speech error:', error);
       setIsSpeaking(false);
     }
-  }, []);
+  }, [ttsEnabled]);
 
   return {
     isListening,
     isSpeaking,
+    ttsEnabled,
     startRecording,
     stopRecording,
-    speak
+    speak,
+    toggleTts
   };
 }; 
