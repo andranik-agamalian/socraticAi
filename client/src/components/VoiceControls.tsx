@@ -4,6 +4,7 @@ import { MdMic, MdMicOff, MdVolumeUp, MdVolumeOff } from 'react-icons/md';
 interface VoiceControlsProps {
   isListening: boolean;
   isSpeaking: boolean;
+  ttsEnabled: boolean;
   onStartListening: () => void;
   onStopListening: () => void;
   onToggleSpeech: () => void;
@@ -11,7 +12,7 @@ interface VoiceControlsProps {
 
 const VoiceControls: React.FC<VoiceControlsProps> = ({
   isListening,
-  isSpeaking,
+  ttsEnabled,
   onStartListening,
   onStopListening,
   onToggleSpeech,
@@ -27,13 +28,13 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
           {isListening ? <MdMicOff /> : <MdMic />}
         </IconButton>
       </Tooltip>
-      <Tooltip title={isSpeaking ? "Disable voice responses" : "Enable voice responses"}>
+      <Tooltip title={ttsEnabled ? "Disable voice responses" : "Enable voice responses"}>
         <IconButton 
           onClick={onToggleSpeech}
-          color={isSpeaking ? "primary" : "default"}
-          aria-label={isSpeaking ? "Disable voice responses" : "Enable voice responses"}
+          color={ttsEnabled ? "primary" : "default"}
+          aria-label={ttsEnabled ? "Disable voice responses" : "Enable voice responses"}
         >
-          {isSpeaking ? <MdVolumeUp /> : <MdVolumeOff />}
+          {ttsEnabled ? <MdVolumeUp /> : <MdVolumeOff />}
         </IconButton>
       </Tooltip>
     </>

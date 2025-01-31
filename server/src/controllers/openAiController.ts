@@ -187,7 +187,7 @@ export const textToSpeech = async (req: Request, res: Response, next: NextFuncti
       model: "tts-1",
       voice: "sage",
       input: text,
-      speed: 1.20
+      speed: 1.19
     });
 
     // Convert to buffer and send

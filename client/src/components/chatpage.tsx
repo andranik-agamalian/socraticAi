@@ -30,8 +30,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { send, responseMessage, resetResponsMessage } = useOpenAI(sessionId);
-  const [textToSpeechEnabled, setTextToSpeechEnabled] = useState(false);
-  const { isListening, isSpeaking, startRecording, stopRecording, speak } = useVoiceControls();
+  const { isListening, isSpeaking, startRecording, stopRecording, speak, toggleTts, ttsEnabled } = useVoiceControls();
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -67,13 +66,12 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
         },
       ]);
       
-      if (textToSpeechEnabled) {
+      if (ttsEnabled) {
         speak(responseMessage);
       }
       
       resetResponsMessage();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [responseMessage]);
 
   const handleSendMessage = async () => {
@@ -146,6 +144,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
             <VoiceControls
               isListening={isListening}
               isSpeaking={isSpeaking}
+              ttsEnabled={ttsEnabled}
               onStartListening={async () => {
                 console.log('Start listening clicked');
                 if (!isListening) {
@@ -160,7 +159,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ sessionId }) => {
                   setNewMessage(transcript);
                 }
               }}
-              onToggleSpeech={() => setTextToSpeechEnabled(!textToSpeechEnabled)}
+              onToggleSpeech={toggleTts}
             />
             <IconButton
               onClick={handleSendMessage}
